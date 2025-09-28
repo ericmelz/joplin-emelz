@@ -24,16 +24,24 @@
 
 ## 🚨 **REMAINING CRITICAL ISSUES**
 
-### **1. Template Value Issues** - ❌ NOT FIXED
-- **Problem**: Environment variables in deployment use unquoted Helm values
-- **Location**: `helm/templates/deployment.yaml:36-42`
-- **Risk**: Numeric values (ports) will fail without quotes
-- **Current Code**:
+### **1. Template Value Issues** - ⚠️ PARTIALLY FIXED
+- **Problem**: Some environment variables still use unquoted Helm values
+- **Location**: `helm/templates/deployment.yaml:32,34,40,42,44`
+- **Progress**: Numeric values (APP_PORT, POSTGRES_PORT) now properly quoted ✅
+- **Remaining unquoted values**:
   ```yaml
-  - name: POSTGRES_PORT
-    value: {{ .Values.postgresPort }}  # Should be: value: "{{ .Values.postgresPort }}"
+  - name: APP_BASE_URL
+    value: {{ .Values.appBaseUrl }}        # Needs quotes
+  - name: DB_CLIENT  
+    value: {{ .Values.dbClient }}          # Needs quotes
+  - name: POSTGRES_DATABASE
+    value: {{ .Values.postgresDatabase }}  # Needs quotes
+  - name: POSTGRES_USER
+    value: {{ .Values.postgresUser }}      # Needs quotes
+  - name: JWT_SECRET_FILE
+    value: {{ .Values.jwtSecretFile }}     # Needs quotes
   ```
-- **Status**: Still needs quotes around all template values
+- **Status**: Critical numeric values fixed, string values still need quotes
 
 ### **2. Missing Secret Values** - ❌ NOT FIXED
 - **Problem**: `postgresPassword` is empty string in values.yaml
@@ -78,7 +86,7 @@
 ## 📋 **UPDATED FIX PRIORITIES**
 
 ### **High Priority (Still Blocking Deployment):**
-1. ❌ **Add quotes to template values** - Ensure all Helm values are properly quoted
+1. ⚠️ **Complete template value quoting** - String values still need quotes (numeric values fixed)
 2. ❌ **Provide actual secret values** - Set postgresPassword in values.yaml
 
 ### **Medium Priority (Testing Needed):**
@@ -104,8 +112,9 @@ Before deployment, verify:
 ## 🔧 **UPDATED QUICK FIX COMMANDS**
 
 ```bash
-# 1. Fix remaining template quotes (HIGH PRIORITY)
-# Edit helm/templates/deployment.yaml to add quotes around all {{ .Values.* }}
+# 1. Fix remaining string template quotes (HIGH PRIORITY)
+# Edit helm/templates/deployment.yaml to add quotes around remaining string values:
+# APP_BASE_URL, DB_CLIENT, POSTGRES_DATABASE, POSTGRES_USER, JWT_SECRET_FILE
 
 # 2. Deploy with actual secrets (CRITICAL)
 helm install joplin ./helm \
@@ -130,12 +139,12 @@ kubectl logs <joplin-pod-name>
 - ✅ PVC naming mismatches
 - ✅ Configuration path conflicts
 
-**REMAINING ISSUES (3/7):**
-- ❌ Template value quoting
+**REMAINING ISSUES (2.5/7):**
+- ⚠️ Template value quoting (partially fixed - numeric values done)
 - ❌ Missing secret values  
 - ⚠️ k3d volume mount testing needed
 
-**Deployment Readiness: ~70% - Close to working!**
+**Deployment Readiness: ~75% - Very close to working!**
 
 ---
 
