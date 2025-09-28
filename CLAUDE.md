@@ -48,10 +48,9 @@ The application expects these local directories:
 
 ## Known Issues
 
-1. **Cluster naming inconsistency**: Creation script uses "joplin" cluster name but destruction script uses "dev"
-2. **Missing Helm values**: Helm templates reference `.Values` but no values.yaml file exists
-3. **Template syntax errors**: Secret template in helm/templates/secret.yaml has malformed Go template syntax
-4. **Missing variable definition**: `CLUSTER_LIST` variable is referenced but not defined in k3d.sh
+1. **Missing Helm values**: Helm templates reference `.Values` but no values.yaml file exists
+2. **Template syntax errors**: Secret template in helm/templates/secret.yaml has malformed Go template syntax
+3. **Missing variable definition**: `CLUSTER_LIST` variable is referenced but not defined in k3d.sh
 
 ## Configuration
 
