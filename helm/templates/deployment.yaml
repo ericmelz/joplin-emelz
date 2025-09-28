@@ -29,19 +29,19 @@ spec:
         - name: APP_PORT
           value: "{{ .Values.appPort }}"
         - name: APP_BASE_URL
-          value: {{ .Values.appBaseUrl }}
+          value: "{{ .Values.appBaseUrl }}"
         - name: DB_CLIENT
-          value: {{ .Values.dbClient }}
+          value: "{{ .Values.dbClient }}"
         - name: POSTGRES_HOST
-          value: {{ .Values.postgresHost }}
+          value: "{{ .Values.postgresHost }}"
         - name: POSTGRES_PORT
           value: "{{ .Values.postgresPort }}"
         - name: POSTGRES_DATABASE
-          value: {{ .Values.postgresDatabase }}
+          value: "{{ .Values.postgresDatabase }}"
         - name: POSTGRES_USER
-          value: {{ .Values.postgresUser }}
+          value: "{{ .Values.postgresUser }}"
         - name: JWT_SECRET_FILE
-          value: {{ .Values.jwtSecretFile }}
+          value: "{{ .Values.jwtSecretFile }}"
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
