@@ -48,9 +48,7 @@ The application expects these local directories:
 
 ## Known Issues
 
-1. **Missing Helm values**: Helm templates reference `.Values` but no values.yaml file exists
-2. **Template syntax errors**: Secret template in helm/templates/secret.yaml has malformed Go template syntax
-3. **Missing variable definition**: `CLUSTER_LIST` variable is referenced but not defined in k3d.sh
+1. **Template syntax errors**: Secret template in helm/templates/secret.yaml has malformed Go template syntax
 
 ## Configuration
 
