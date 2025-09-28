@@ -48,7 +48,7 @@ The application expects these local directories:
 
 ## Known Issues
 
-1. **Template syntax errors**: Secret template in helm/templates/secret.yaml has malformed Go template syntax
+None - all previously identified issues have been resolved.
 
 ## Configuration
 
