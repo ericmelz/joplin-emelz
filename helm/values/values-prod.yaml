@@ -1,0 +1,5 @@
+deploymentEnv: prod
+
+ingress:
+  host: joplin.emelz.org
+  path: /

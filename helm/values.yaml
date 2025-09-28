@@ -1,0 +1,11 @@
+deploymentEnv: dev
+appPort=22300
+appBaseUrl=https://joplin.emelz.org
+cookieSecure=true
+dbClient=pg
+postgresHost=rs2423.porgy-sole.ts.net
+postgresPort=55434
+postgresDatabase=joplin
+postgresUser=joplin
+postgresPasswordFile=/run/secrets/pg_password
+jwtSecretFile=/run/secrets/jwt_secret
