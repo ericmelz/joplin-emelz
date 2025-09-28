@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: joplin-emelz-pv-joplin
+  name: pv-joplin-emelz-joplin
 spec:
   capacity:
     storage: 10Gi
@@ -11,5 +11,5 @@ spec:
   hostPath:
     path: /Users/ericmelz/Data/var/joplin-server/data
   claimRef:
-    name: joplin-emelz-pvc-joplin
+    name: pvc-joplin-emelz-joplin
     namespace: default

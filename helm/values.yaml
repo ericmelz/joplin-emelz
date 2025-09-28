@@ -9,5 +9,4 @@ postgresDatabase: joplin
 postgresUser: joplin
 postgresPassword: ""
 postgresPasswordFile: /run/secrets/pg_password
-jwtSecret: ""
 jwtSecretFile: /run/secrets/jwt_secret

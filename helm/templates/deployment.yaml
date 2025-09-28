@@ -40,22 +40,20 @@ spec:
           value: {{ .Values.postgresDatabase }}
         - name: POSTGRES_USER
           value: {{ .Values.postgresUser }}
+        - name: JWT_SECRET_FILE
+          value: {{ .Values.jwtSecretFile }}
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: joplin-emelz-secret
               key: POSTGRES_PASSWORD
-        - name: JWT_SECRET_FILE
-          valueFrom:
-            secretKeyRef:
-              name: joplin-emelz-secret
-              key: JWT_SECRET_FILE
         volumeMounts:
         - name: joplin-emelz-joplin
           mountPath: /home/joplin/.joplin
           readOnly: false
         - name: joplin-emelz-jwt-secret
-          mountPath: /run/secrets/jwt_secret
+          mountPath: /run/secrets/
+          subPath: jwt_secret
           readOnly: true
         ports:
         - containerPort: 22300
