@@ -10,7 +10,7 @@ This is a Kubernetes infrastructure project for deploying a Joplin notes server 
 
 ### Cluster Management
 - `make k3d` - Create k3d cluster named "joplin" with port forwarding (22300:22300)
-- `make destroy-k3d` - Destroy k3d cluster (NOTE: destroys cluster named "dev", inconsistent with creation)
+- `make destroy-k3d` - Destroy k3d cluster "joplin"
 
 ### Manual Cluster Commands
 - `bash scripts/k3d.sh` - Create cluster directly

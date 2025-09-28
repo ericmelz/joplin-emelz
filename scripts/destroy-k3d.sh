@@ -2,6 +2,6 @@
 
 set -euo pipefail
 
-CLUSTER_NAME="dev"
+CLUSTER_NAME="joplin"
 
 k3d cluster delete $CLUSTER_NAME
