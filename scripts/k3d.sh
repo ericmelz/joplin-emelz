@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-CLUSTER_NAME="dev"
+CLUSTER_NAME="joplin"
 
 VAR_DIR="$HOME/Data/var"
 
@@ -13,6 +13,5 @@ if echo $CLUSTER_LIST | grep -q "$CLUSTER_NAME"; then
 else
   echo "Creating cluster '$CLUSTER_NAME' using project-specific config..."
   k3d cluster create "$CLUSTER_NAME" \
-      -p "8880:80@loadbalancer" \
-      --volume "$VAR_DIR:/mnt/var@server:0"
+      -p "22300:22300@loadbalancer"
 fi

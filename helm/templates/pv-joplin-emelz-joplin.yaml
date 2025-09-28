@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: joplin-emelz-pv-joplin
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /Users/ericmelz/Data/var/joplin-server/data
+  claimRef:
+    name: joplin-emelz-pvc-joplin
+    namespace: default

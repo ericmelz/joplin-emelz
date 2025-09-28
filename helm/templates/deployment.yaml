@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: joplin-emelz
+  labels:
+    app: joplin-emelz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: joplin-emelz
+  template:
+    metadata:
+      labels:
+        app: joplin-emelz
+    spec:
+      volumes:
+        - name: joplin-emelz-joplin
+          persistentVolumeClaim:
+            claimName: pvc-joplin-emelz-joplin
+        - name: joplin-emelz-jwt-secret
+          persistentVolumeClaim:
+            claimName: pvc-joplin-emelz-jwt-secret
+      containers:
+      - name: joplin
+        image: joplin/server:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: APP_PORT
+          value: {{ .Values.appPort }}
+        - name: APP_BASE_URL
+          value: {{ .Values.appBaseUrl }}
+        - name: DB_CLIENT
+          value: {{ .Values.dbClient }}
+        - name: POSTGRES_HOST
+          value: {{ .Values.postgresHost }}
+        - name: POSTGRES_PORT
+          value: {{ .Values.postgresPort }}
+        - name: POSTGRES_DATABASE
+          value: {{ .Values.postgresDatabase }}
+        - name: POSTGRES_USER
+          value: {{ .Values.postgresUser }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: joplin-emelz-secret
+              key: POSTGRES_PASSWORD
+        - name: JWT_SECRET_FILE
+          valueFrom:
+            secretKeyRef:
+              name: joplin-emelz-secret
+              key: JWT_SECRET_FILE
+        volumeMounts:
+        - name: joplin-emelz-joplin
+          mountPath: /home/joplin/.joplin
+          readOnly: false
+        - name: joplin-emelz-jwt-secret
+          mountPath: /run/secrets/jwt_secret
+          readOnly: true
+        ports:
+        - containerPort: 22300
+          protocol: TCP
+	

@@ -191,4 +191,84 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 [1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hkkubectl get svc[?2004l
 NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
 kubernetes   ClusterIP   10.43.0.1    <none>        443/TCP   18s
-[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004h
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hggig  
+bck-i-search: _[K[A[15Cchmod 755 scri[4mp[24mts/destroy-k3d.sh[1B[48Dp_[A[28C[14Dgit add *;git [24mcommit -m"work";git [4mpu[24msh[1B[53Du_[A[47C[1C[4mu[4ms[24m[1B[51Ds_[A[46C[2C[4ms[4mh[24m[1B[51Dh_[A[45C[24mp[24mu[24ms[24mh[1B[K[A[64C[?2004l[1BThe following paths are ignored by one of your .gitignore files:
+Makefile~
+[33mhint: Use -f if you really want to add them.[m
+[33mhint: Turn this message off by running[m
+[33mhint: "git config advice.addIgnoredFile false"[m
+[main 98fc6d2] work
+ 4 files changed, 113 insertions(+), 7 deletions(-)
+ create mode 100755 scripts/destroy-k3d.sh
+Enumerating objects: 12, done.
+Counting objects:   8% (1/12)Counting objects:  16% (2/12)Counting objects:  25% (3/12)Counting objects:  33% (4/12)Counting objects:  41% (5/12)Counting objects:  50% (6/12)Counting objects:  58% (7/12)Counting objects:  66% (8/12)Counting objects:  75% (9/12)Counting objects:  83% (10/12)Counting objects:  91% (11/12)Counting objects: 100% (12/12)Counting objects: 100% (12/12), done.
+Delta compression using up to 14 threads
+Compressing objects:  14% (1/7)Compressing objects:  28% (2/7)Compressing objects:  42% (3/7)Compressing objects:  57% (4/7)Compressing objects:  71% (5/7)Compressing objects:  85% (6/7)Compressing objects: 100% (7/7)Compressing objects: 100% (7/7), done.
+Writing objects:  14% (1/7)Writing objects:  28% (2/7)Writing objects:  42% (3/7)Writing objects:  57% (4/7)Writing objects:  71% (5/7)Writing objects:  85% (6/7)Writing objects: 100% (7/7)Writing objects: 100% (7/7), 3.39 KiB | 3.39 MiB/s, done.
+Total 7 (delta 2), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas:   0% (0/2)[Kremote: Resolving deltas:  50% (1/2)[Kremote: Resolving deltas: 100% (2/2)[Kremote: Resolving deltas: 100% (2/2), completed with 2 local objects.[K
+To github.com:ericmelz/joplin-emelz.git
+   b6d37d2..98fc6d2  main -> main
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hccat ~/Data/var/joplin-server[1m/[0m[0m/secrets[1m/[0m[0m/.jwt_secret[?2004l
+01c2ead071b057aea10463a4b0bf9fda3bb58629aa7615405f1ff6c0fc7c0b70
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hcchmod 600 ~/Data/var[1m/[0m[0m/joplin-server[1m/[0m[0m/secrets[1m/[0m[0m/.jwt_secret[K[?2004l
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hchmod 600 ~/Data/var/joplin-server/secrets/.jwt_secret[K[A[26C[K[1B[K[A[30Cmmake destroy-k3d[?2004l[1Bbash scripts/destroy-k3d.sh
+[36mINFO[0m[0000] Deleting cluster 'dev'                       
+[36mINFO[0m[0000] Deleting cluster network 'k3d-dev'           
+[36mINFO[0m[0000] Deleting 1 attached volumes...               
+[36mINFO[0m[0000] Removing cluster details from default kubeconfig... 
+[36mINFO[0m[0000] Removing standalone kubeconfig file (if there is one)... 
+[36mINFO[0m[0000] Successfully deleted cluster dev!            
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004h[?2004l
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004h[?2004l
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hmmake k3d[?2004l
+bash scripts/k3d.sh
+CLUSTER_NAME=joplin
+scripts/k3d.sh: line 11: CLUSTER_LIST: unbound variable
+Creating cluster 'joplin' using project-specific config...
+[36mINFO[0m[0000] portmapping '22300:22300' targets the loadbalancer: defaulting to [servers:*:proxy agents:*:proxy] 
+[36mINFO[0m[0000] Prep: Network                                
+[36mINFO[0m[0000] Created network 'k3d-joplin'                 
+[36mINFO[0m[0000] Created image volume k3d-joplin-images       
+[36mINFO[0m[0000] Starting new tools node...                   
+[36mINFO[0m[0000] Starting node 'k3d-joplin-tools'             
+[36mINFO[0m[0001] Creating node 'k3d-joplin-server-0'          
+[36mINFO[0m[0001] Creating LoadBalancer 'k3d-joplin-serverlb'  
+[36mINFO[0m[0001] Using the k3d-tools node to gather environment information 
+[36mINFO[0m[0001] Starting new tools node...                   
+[36mINFO[0m[0001] Starting node 'k3d-joplin-tools'             
+[36mINFO[0m[0002] Starting cluster 'joplin'                    
+[36mINFO[0m[0002] Starting servers...                          
+[36mINFO[0m[0002] Starting node 'k3d-joplin-server-0'          
+[36mINFO[0m[0004] All agents already running.                  
+[36mINFO[0m[0004] Starting helpers...                          
+[36mINFO[0m[0004] Starting node 'k3d-joplin-serverlb'          
+[36mINFO[0m[0010] Injecting records for hostAliases (incl. host.k3d.internal) and for 3 network members into CoreDNS configmap... 
+[36mINFO[0m[0012] Cluster 'joplin' created successfully!       
+[36mINFO[0m[0012] You can now use it like this:                
+kubectl cluster-info
+scripts/k3d.sh: line 17: --volume: command not found
+make: *** [k3d] Error 127
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hggit status[?2004l
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	[31mmodified:   k3d.sh[m
+	[31mmodified:   scripts/k3d.sh[m
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	[31mhelm/[m
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hggit add helm[?2004l
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hkkik  ggit add *[?2004l
+The following paths are ignored by one of your .gitignore files:
+Makefile~
+[33mhint: Use -f if you really want to add them.[m
+[33mhint: Turn this message off by running[m
+[33mhint: "git config advice.addIgnoredFile false"[m
+[1m[7m%[27m[1m[0m                                                                                ]7;file://homer/Users/ericmelz/Data/code/joplin-emelz[0m[27m[24m[Jericmelz@homer joplin-emelz % [K[?2004hggi
