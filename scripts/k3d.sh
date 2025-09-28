@@ -8,6 +8,8 @@ VAR_DIR="$HOME/Data/var"
 
 echo "CLUSTER_NAME=$CLUSTER_NAME"
 
+CLUSTER_LIST=$(k3d cluster list)
+
 if echo $CLUSTER_LIST | grep -q "$CLUSTER_NAME"; then
   echo "Cluster '$CLUSTER_NAME' already exists.  Skipping creation"
 else
