@@ -10,3 +10,8 @@ postgresUser: joplin
 postgresPassword: ""
 postgresPasswordFile: /run/secrets/pg_password
 jwtSecretFile: /run/secrets/jwt_secret
+
+storage:
+  hostPath:
+    jwtSecret: /mnt/var/joplin-server/secrets/.jwt_secret
+    joplinData: /mnt/var/joplin-server/data

@@ -8,8 +8,9 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual-hostpath
   hostPath:
-    path: /Users/ericmelz/Data/var/joplin-server/data
+    path: {{ .Values.storage.hostPath.joplinData }}
   claimRef:
     name: pvc-joplin-emelz-joplin
     namespace: default
