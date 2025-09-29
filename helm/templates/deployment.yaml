@@ -52,8 +52,7 @@ spec:
           mountPath: /home/joplin/.joplin
           readOnly: false
         - name: joplin-emelz-jwt-secret
-          mountPath: /run/secrets/
-          subPath: jwt_secret
+          mountPath: /run/secrets/jwt_secret
           readOnly: true
         ports:
         - containerPort: 22300
