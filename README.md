@@ -235,7 +235,7 @@ ericmelz@homer joplin-emelz % curl http://localhost:22300/api/ping
 
 ### terminal 1:
 Kill the log tailing and destroy the cluster:
-```
+```bash
 ^C
                                                                                                                      ericmelz@homer joplin-emelz % make destroy-k3d
 bash scripts/destroy-k3d.sh
