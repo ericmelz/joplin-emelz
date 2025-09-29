@@ -236,7 +236,8 @@ ericmelz@homer joplin-emelz % curl http://localhost:22300/api/ping
 ### terminal 1:
 Kill the log tailing and destroy the cluster:
 ```
-^C%                                                                                                                                     ericmelz@homer joplin-emelz % make destroy-k3d
+^C
+                                                                                                                     ericmelz@homer joplin-emelz % make destroy-k3d
 bash scripts/destroy-k3d.sh
 INFO[0000] Deleting cluster 'joplin'                    
 INFO[0002] Deleting cluster network 'k3d-joplin'        
@@ -245,21 +246,6 @@ INFO[0002] Removing cluster details from default kubeconfig...
 INFO[0002] Removing standalone kubeconfig file (if there is one)... 
 INFO[0002] Successfully deleted cluster joplin!         
 ```
-
-
-
-In teminal 2:
-```bash
-curl http://localhost:22300/api/ping
-{"status":"ok","message":"Joplin Server is running"}
-```
-
-In terminal 1:
-```bash
-^C
-make destroy-k3d
-```
-
 
 # Prod setup
 TBD
