@@ -237,7 +237,8 @@ ericmelz@homer joplin-emelz % curl http://localhost:22300/api/ping
 Kill the log tailing and destroy the cluster:
 ```bash
 ^C
-                                                                                                                     ericmelz@homer joplin-emelz % make destroy-k3d
+
+ericmelz@homer joplin-emelz % make destroy-k3d
 bash scripts/destroy-k3d.sh
 INFO[0000] Deleting cluster 'joplin'                    
 INFO[0002] Deleting cluster network 'k3d-joplin'        
