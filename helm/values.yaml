@@ -1,9 +1,9 @@
 deploymentEnv: dev
 appPort: 22300
-appBaseUrl: https://joplin.emelz.org
-cookieSecure: true
+appBaseUrl: http://localhost:22300
+cookieSecure: false
 dbClient: pg
-postgresHost: rs2423.porgy-sole.ts.net
+postgresHost: 100.102.105.59
 postgresPort: 55434
 postgresDatabase: joplin
 postgresUser: joplin
