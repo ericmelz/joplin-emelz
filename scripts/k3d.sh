@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-if [ -z "${PG_PASSWORD:-}" ]; then
-    echo "❌ Environment variable POSTGREG_PASSWORD must be set before running make k3d.  Example:"
-    echo "  export POSTGRESG_PASSWORD=s3cr3t! && make k3d"
+if [ -z "${POSTGRES_PASSWORD:-}" ]; then
+    echo "❌ Environment variable POSTGRES_PASSWORD must be set before running make k3d.  Example:"
+    echo "  export POSTGRESS_PASSWORD=s3cr3t! && make k3d"
     exit 1
 fi
   
