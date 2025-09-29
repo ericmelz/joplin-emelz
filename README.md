@@ -12,7 +12,8 @@ Navigate to [http://localhost:22300](http://localhost:22300)
 ![Jopling login](<images/Joplin login.png>)
 
 ## Example
-(expandable) 
+<details>
+<summary>Click to expand detailed example</summary>
 
 ### terminal 1:
 Start the server
@@ -245,8 +246,10 @@ INFO[0002] Deleting cluster network 'k3d-joplin'
 INFO[0002] Deleting 1 attached volumes...               
 INFO[0002] Removing cluster details from default kubeconfig... 
 INFO[0002] Removing standalone kubeconfig file (if there is one)... 
-INFO[0002] Successfully deleted cluster joplin!         
+INFO[0002] Successfully deleted cluster joplin!
 ```
+
+</details>
 
 # Prod setup
 TBD
