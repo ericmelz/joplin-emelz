@@ -9,7 +9,6 @@ curl http://localhost:22300/api/ping
 make destroy-k3d
 ```
 Navigate to [http://localhost:22300](http://localhost:22300)
-![Jopling login](<images/Joplin login.png>)
 
 ## Example
 <details>
@@ -233,6 +232,9 @@ Ping the server
 ericmelz@homer joplin-emelz % curl http://localhost:22300/api/ping
 {"status":"ok","message":"Joplin Server is running"}%    
 ```
+
+Navigate to [http://localhost:22300](http://localhost:22300)
+![Jopling login](<images/Joplin login.png>)
 
 ### terminal 1:
 Kill the log tailing and destroy the cluster:
