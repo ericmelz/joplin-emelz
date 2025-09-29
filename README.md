@@ -8,7 +8,6 @@ make k3d
 curl http://localhost:22300/api/ping
 make destroy-k3d
 ```
-Navigate to [http://localhost:22300](http://localhost:22300)
 
 ## Example
 <details>
