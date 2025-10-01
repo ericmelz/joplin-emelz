@@ -10,7 +10,7 @@ app:
 
 # Database configuration (via Tailscale)
 database:
-  host: rs2423.porgy-sole.ts.net  # Tailscale hostname
+  host: 100.102.105.59  # Tailscale IP (same as local)
   port: 55434
   name: joplin
   user: joplin

@@ -382,3 +382,30 @@ Secrets are automatically decrypted during deployment for all environments.
 - Ingress controller (Traefik recommended)
 - cert-manager for TLS (production)
 
+## 🌐 Ingress Configuration
+
+Configure external access to your Joplin server via nginx + traefik ingress:
+
+### Quick Setup
+```bash
+# 1. Configure traefik ingress (run locally)
+./scripts/configure-traefik.sh
+
+# 2. Configure nginx reverse proxy (run on AWS instance)
+sudo ./scripts/configure-nginx.sh --domain joplin.emelz.org --ssl
+```
+
+### Architecture
+```
+Internet → Nginx (AWS EC2) → Traefik (K8s NodePort 30080) → Joplin Service → Pods
+```
+
+### Features
+- **SSL Termination**: Let's Encrypt certificates at nginx level
+- **Security Headers**: HSTS, XSS protection, content type validation
+- **WebSocket Support**: Real-time features for Joplin
+- **Health Monitoring**: Built-in health check endpoints
+- **Auto-Renewal**: Automatic SSL certificate renewal
+
+📖 **[Complete Ingress Setup Guide](INGRESS.md)**
+
