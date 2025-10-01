@@ -19,8 +19,8 @@ spec:
           persistentVolumeClaim:
             claimName: pvc-joplin-emelz-joplin
         - name: joplin-emelz-jwt-secret
-          persistentVolumeClaim:
-            claimName: pvc-joplin-emelz-jwt-secret
+          configMap:
+            name: joplin-emelz-secrets
       containers:
       - name: joplin
         image: joplin/server:latest
@@ -53,6 +53,7 @@ spec:
           readOnly: false
         - name: joplin-emelz-jwt-secret
           mountPath: /run/secrets/jwt_secret
+          subPath: jwt_secret
           readOnly: true
         ports:
         - containerPort: 22300

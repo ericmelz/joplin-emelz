@@ -13,5 +13,8 @@ jwtSecretFile: /run/secrets/jwt_secret
 
 storage:
   hostPath:
-    jwtSecret: /mnt/var/joplin-server/secrets/.jwt_secret
     joplinData: /mnt/var/joplin-server/data
+
+# Encrypted secrets (populated by deployment scripts)
+secrets:
+  jwtSecret: ""  # Will be populated from encrypted secrets file

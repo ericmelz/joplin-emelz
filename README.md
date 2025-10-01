@@ -2,12 +2,23 @@
 K8s Configuration for joplin-emelz
 
 # Local setup
-## tldr;
+## Quick Start
+
+**With encrypted secrets (recommended):**
+```bash
+./scripts/setup-secrets.sh    # One-time setup
+./scripts/deploy.sh           # Deploy with encrypted secrets
+curl http://localhost:22300/api/ping
+```
+
+**Traditional method:**
 ```bash
 make k3d
 curl http://localhost:22300/api/ping
 make destroy-k3d
 ```
+
+📖 **[Encrypted Secrets Documentation](SECRETS.md)**
 
 ## Example
 <details>
