@@ -1,19 +1,65 @@
+# Default values - override with environment-specific values
+environment: local
+namespace: default
+
+# Application configuration
+app:
+  baseUrl: http://localhost:22300
+  port: 22300
+  cookieSecure: false
+
+# Database configuration
+database:
+  client: pg
+  host: localhost
+  port: 5432
+  name: joplin
+  user: joplin
+
+# Legacy compatibility (will be deprecated)
 deploymentEnv: dev
-appPort: 22300
-appBaseUrl: http://localhost:22300
-cookieSecure: false
-dbClient: pg
-postgresHost: 100.102.105.59
-postgresPort: 55434
-postgresDatabase: joplin
-postgresUser: joplin
+appPort: "{{ .Values.app.port }}"
+appBaseUrl: "{{ .Values.app.baseUrl }}"
+cookieSecure: "{{ .Values.app.cookieSecure }}"
+dbClient: "{{ .Values.database.client }}"
+postgresHost: "{{ .Values.database.host }}"
+postgresPort: "{{ .Values.database.port }}"
+postgresDatabase: "{{ .Values.database.name }}"
+postgresUser: "{{ .Values.database.user }}"
 postgresPassword: ""
 postgresPasswordFile: /run/secrets/pg_password
 jwtSecretFile: /run/secrets/jwt_secret
 
+# Storage configuration
 storage:
-  hostPath:
-    joplinData: /mnt/var/joplin-server/data
+  type: hostPath  # hostPath, dynamic, or pvc
+  className: manual-hostpath
+  size: 10Gi
+  hostPath: /mnt/var/joplin-server/data
+
+# Service configuration
+service:
+  type: LoadBalancer
+  port: 22300
+  nodePort: null
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: ""
+  host: ""
+  tls: false
+
+# Resource configuration
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+replicas: 1
 
 # Encrypted secrets (populated by deployment scripts)
 secrets:

@@ -32,27 +32,37 @@ debug() {
 
 usage() {
     echo "Usage: $0 [OPTIONS] [RELEASE_NAME]"
-    echo "Deploy Joplin server with encrypted secrets"
+    echo "Deploy Joplin server with encrypted secrets to multiple environments"
     echo ""
     echo "Arguments:"
     echo "  RELEASE_NAME    Helm release name (default: joplin-server)"
     echo ""
     echo "Options:"
-    echo "  --namespace NS  Deploy to specific namespace (default: default)"
+    echo "  --env ENV       Target environment (local, aws-prod, aws-staging)"
+    echo "  --context CTX   Override kubectl context"
+    echo "  --namespace NS  Override namespace"
     echo "  --upgrade       Upgrade existing release"
     echo "  --dry-run       Show what would be deployed without deploying"
     echo "  --debug         Enable debug output"
     echo "  --help          Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0"
-    echo "  $0 --upgrade joplin-prod"
-    echo "  $0 --namespace joplin-prod --dry-run"
+    echo "  $0 --env local"
+    echo "  $0 --env aws-prod --upgrade"
+    echo "  $0 --env aws-staging --dry-run"
+    echo "  $0 --context k3s-aws-prod --namespace custom-ns"
+    echo ""
+    echo "Environment Files:"
+    echo "  environments/local/values.yaml"
+    echo "  environments/aws-prod/values.yaml"
+    echo "  environments/aws-staging/values.yaml"
 }
 
 # Default values
 RELEASE_NAME="joplin-server"
-NAMESPACE="default"
+ENVIRONMENT=""
+CONTEXT=""
+NAMESPACE=""
 UPGRADE=false
 DRY_RUN=false
 DEBUG=false
@@ -60,6 +70,14 @@ DEBUG=false
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --env)
+            ENVIRONMENT="$2"
+            shift 2
+            ;;
+        --context)
+            CONTEXT="$2"
+            shift 2
+            ;;
         --namespace)
             NAMESPACE="$2"
             shift 2
@@ -91,6 +109,52 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Environment setup
+setup_environment() {
+    if [[ -n "$ENVIRONMENT" ]]; then
+        local env_values_file="$PROJECT_ROOT/environments/$ENVIRONMENT/values.yaml"
+
+        if [[ ! -f "$env_values_file" ]]; then
+            error "Environment values file not found: $env_values_file"
+            echo "Available environments:"
+            ls -1 "$PROJECT_ROOT/environments/" 2>/dev/null || echo "  No environments configured"
+            exit 1
+        fi
+
+        info "Using environment: $ENVIRONMENT"
+        info "Values file: $env_values_file"
+
+        # Auto-detect context if not specified
+        if [[ -z "$CONTEXT" ]]; then
+            case "$ENVIRONMENT" in
+                local) CONTEXT="k3d-joplin" ;;
+                aws-prod) CONTEXT="k3s-aws-prod" ;;
+                aws-staging) CONTEXT="k3s-aws-staging" ;;
+            esac
+        fi
+
+        # Auto-detect namespace if not specified (from environment values)
+        if [[ -z "$NAMESPACE" ]]; then
+            NAMESPACE=$(yq eval '.namespace' "$env_values_file" 2>/dev/null || echo "default")
+        fi
+
+        export ENVIRONMENT_VALUES_FILE="$env_values_file"
+    else
+        # Default to local environment if no environment specified
+        ENVIRONMENT="local"
+        export ENVIRONMENT_VALUES_FILE="$PROJECT_ROOT/environments/local/values.yaml"
+        if [[ -z "$CONTEXT" ]]; then
+            CONTEXT="k3d-joplin"
+        fi
+        if [[ -z "$NAMESPACE" ]]; then
+            NAMESPACE="default"
+        fi
+    fi
+
+    info "Target context: $CONTEXT"
+    info "Target namespace: $NAMESPACE"
+}
 
 # Check if secrets are set up
 check_secrets_setup() {
@@ -158,6 +222,12 @@ deploy() {
     helm_args+=("$RELEASE_NAME" "$HELM_DIR")
     helm_args+=("--namespace" "$NAMESPACE")
     helm_args+=("--values" "$HELM_DIR/values.yaml")
+
+    # Add environment-specific values if available
+    if [[ -n "$ENVIRONMENT_VALUES_FILE" ]]; then
+        helm_args+=("--values" "$ENVIRONMENT_VALUES_FILE")
+    fi
+
     helm_args+=("--values" "$temp_values_file")
 
     if $DRY_RUN; then
@@ -193,6 +263,7 @@ deploy() {
 main() {
     info "Deploying Joplin server with encrypted secrets..."
 
+    setup_environment
     check_secrets_setup
     deploy
 }

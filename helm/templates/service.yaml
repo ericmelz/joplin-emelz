@@ -2,13 +2,19 @@ apiVersion: v1
 kind: Service
 metadata:
   name: joplin-emelz
-  namespace: default
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: joplin-emelz
+    environment: {{ .Values.environment }}
 spec:
   selector:
     app: joplin-emelz
   ports:
-  - name: p22300
-    port: 22300
-    targetPort: 22300
+  - name: http
+    port: {{ .Values.service.port }}
+    targetPort: {{ .Values.app.port }}
     protocol: TCP
-  type: LoadBalancer
+    {{- if and (eq .Values.service.type "NodePort") .Values.service.nodePort }}
+    nodePort: {{ .Values.service.nodePort }}
+    {{- end }}
+  type: {{ .Values.service.type }}

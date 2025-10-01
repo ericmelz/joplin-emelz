@@ -1,0 +1,52 @@
+# AWS Production k3s environment values
+environment: aws-prod
+namespace: joplin-prod
+
+# Application configuration
+app:
+  baseUrl: https://joplin.emelz.org  # Your production domain
+  port: 22300
+  cookieSecure: true  # HTTPS in production
+
+# Database configuration (via Tailscale)
+database:
+  host: rs2423.porgy-sole.ts.net  # Tailscale hostname
+  port: 55434
+  name: joplin
+  user: joplin
+
+# Storage configuration for AWS k3s
+storage:
+  # Use dynamic provisioning with k3s default storage
+  type: dynamic
+  className: local-path  # k3s default storage class
+  hostPath: null  # Not used for dynamic provisioning
+  size: 20Gi  # Larger for production
+
+# Service configuration
+service:
+  type: ClusterIP  # Use with Ingress for external access
+  port: 22300
+  nodePort: 30300  # Fallback if LoadBalancer not available
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik  # k3s default ingress
+  host: joplin.emelz.org
+  tls: true
+
+# Resource limits (production-grade)
+resources:
+  limits:
+    cpu: 2000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 256Mi
+
+# Production-specific settings
+replicas: 1  # Can be scaled up
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,45 @@
+{{- if eq .Values.storage.type "hostPath" }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-joplin-emelz-joplin
+  labels:
+    app: joplin-emelz
+    environment: {{ .Values.environment }}
+spec:
+  capacity:
+    storage: {{ .Values.storage.size }}
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.className }}
+  hostPath:
+    path: {{ .Values.storage.hostPath }}
+  claimRef:
+    name: pvc-joplin-emelz-joplin
+    namespace: {{ .Values.namespace }}
+{{- end }}
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-joplin-emelz-joplin
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: joplin-emelz
+    environment: {{ .Values.environment }}
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.storage.size }}
+{{- if eq .Values.storage.type "hostPath" }}
+  volumeName: pv-joplin-emelz-joplin
+{{- else }}
+  {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+  {{- end }}
+{{- end }}

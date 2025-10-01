@@ -1,0 +1,50 @@
+# AWS Staging k3s environment values
+environment: aws-staging
+namespace: joplin-staging
+
+# Application configuration
+app:
+  baseUrl: https://joplin-staging.emelz.org  # Staging domain
+  port: 22300
+  cookieSecure: true
+
+# Database configuration (shared with prod for now)
+database:
+  host: rs2423.porgy-sole.ts.net  # Tailscale hostname
+  port: 55434
+  name: joplin_staging  # Different database
+  user: joplin
+
+# Storage configuration for AWS k3s
+storage:
+  type: dynamic
+  className: local-path
+  hostPath: null
+  size: 10Gi  # Smaller for staging
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 22300
+  nodePort: 30301  # Different port from prod
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  host: joplin-staging.emelz.org
+  tls: true
+
+# Resource limits (staging - smaller than prod)
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+replicas: 1
+nodeSelector: {}
+tolerations: []
+affinity: {}

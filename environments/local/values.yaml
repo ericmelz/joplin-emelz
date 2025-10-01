@@ -1,0 +1,46 @@
+# Local k3d environment values
+environment: local
+namespace: default
+
+# Application configuration
+app:
+  baseUrl: http://localhost:22300
+  port: 22300
+  cookieSecure: false
+
+# Database configuration
+database:
+  host: 100.102.105.59  # Tailscale IP
+  port: 55434
+  name: joplin
+  user: joplin
+
+# Storage configuration for local k3d
+storage:
+  # Use hostPath for local development
+  type: hostPath
+  className: manual-hostpath
+  hostPath: /mnt/var/joplin-server/data
+  size: 10Gi
+
+# Service configuration
+service:
+  type: LoadBalancer  # k3d LoadBalancer works locally
+  port: 22300
+  nodePort: null
+
+# Ingress configuration
+ingress:
+  enabled: false  # Not needed for local development
+  className: ""
+  host: ""
+  tls: false
+
+# Resource limits (relaxed for local)
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

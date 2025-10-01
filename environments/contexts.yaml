@@ -1,0 +1,51 @@
+# kubectl context configuration for multi-environment deployment
+# This file documents the expected kubectl contexts for each environment
+
+environments:
+  local:
+    context: k3d-joplin
+    description: "Local k3d cluster for development"
+    setup: |
+      # Created automatically by k3d.sh script
+      k3d cluster create joplin -p "22300:22300@loadbalancer"
+
+  aws-prod:
+    context: k3s-aws-prod
+    description: "Production k3s cluster in AWS (via Tailscale)"
+    setup: |
+      # Add AWS k3s cluster context manually:
+      kubectl config set-cluster k3s-aws-prod \
+        --server=https://YOUR-AWS-TAILSCALE-IP:6443 \
+        --certificate-authority-data=BASE64_CA_CERT
+
+      kubectl config set-credentials k3s-aws-prod \
+        --token=YOUR_SERVICE_ACCOUNT_TOKEN
+
+      kubectl config set-context k3s-aws-prod \
+        --cluster=k3s-aws-prod \
+        --user=k3s-aws-prod
+
+    validation:
+      # Test Tailscale connectivity
+      - ping YOUR-AWS-TAILSCALE-IP
+      # Test cluster access
+      - kubectl --context=k3s-aws-prod get nodes
+
+  aws-staging:
+    context: k3s-aws-staging
+    description: "Staging k3s cluster in AWS (via Tailscale)"
+    setup: |
+      # Same as prod but different context name
+      # Could be same cluster with different namespace
+      kubectl config set-context k3s-aws-staging \
+        --cluster=k3s-aws-prod \
+        --user=k3s-aws-prod \
+        --namespace=joplin-staging
+
+# Context switching commands
+commands:
+  list_contexts: kubectl config get-contexts
+  current_context: kubectl config current-context
+  switch_to_local: kubectl config use-context k3d-joplin
+  switch_to_aws_prod: kubectl config use-context k3s-aws-prod
+  switch_to_aws_staging: kubectl config use-context k3s-aws-staging

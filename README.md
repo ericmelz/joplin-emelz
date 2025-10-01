@@ -1,24 +1,51 @@
 # joplin-emelz
-K8s Configuration for joplin-emelz
+Multi-environment Kubernetes deployment for Joplin Server
 
-# Local setup
-## Quick Start
+## 🚀 Quick Start
 
-**With encrypted secrets (recommended):**
+### Local Development
 ```bash
-./scripts/setup-secrets.sh    # One-time setup
-./scripts/deploy.sh           # Deploy with encrypted secrets
+# One-time setup
+./scripts/setup-secrets.sh
+
+# Create k3d cluster
+make k3d
+
+# Deploy to local environment
+./scripts/deploy.sh --env local
+
+# Test the deployment
 curl http://localhost:22300/api/ping
 ```
 
-**Traditional method:**
+### Production Deployment
 ```bash
-make k3d
-curl http://localhost:22300/api/ping
-make destroy-k3d
+# Deploy to AWS production (via Tailscale)
+./scripts/deploy.sh --env aws-prod
+
+# Deploy to AWS staging
+./scripts/deploy.sh --env aws-staging
 ```
 
 📖 **[Encrypted Secrets Documentation](SECRETS.md)**
+
+## 🌍 Multi-Environment Support
+
+This project supports deployment to multiple environments with environment-specific configuration:
+
+### Available Environments
+- **local**: k3d development cluster with hostPath storage
+- **aws-prod**: Production k3s cluster via Tailscale with ingress and TLS
+- **aws-staging**: Staging k3s cluster (same as prod, different namespace)
+
+### Environment-Specific Features
+| Feature | Local | AWS Prod | AWS Staging |
+|---------|--------|----------|-------------|
+| Storage | hostPath | Dynamic PVC | Dynamic PVC |
+| Service | LoadBalancer | ClusterIP | ClusterIP |
+| Ingress | Disabled | Enabled + TLS | Enabled + TLS |
+| Resources | Development | Production | Production |
+| Database | Tailscale IP | Tailscale hostname | Tailscale hostname |
 
 ## Example
 <details>
@@ -263,6 +290,95 @@ INFO[0002] Successfully deleted cluster joplin!
 
 </details>
 
-# Prod setup
-TBD
+## 🛠️ Deployment Options
+
+### Basic Deployment
+```bash
+./scripts/deploy.sh --env <environment>
+```
+
+### Advanced Options
+```bash
+# Upgrade existing deployment
+./scripts/deploy.sh --env aws-prod --upgrade
+
+# Dry run to preview changes
+./scripts/deploy.sh --env local --dry-run
+
+# Custom context and namespace
+./scripts/deploy.sh --context my-context --namespace my-ns
+
+# Debug mode
+./scripts/deploy.sh --env aws-prod --debug
+```
+
+## 🔧 Context Management
+
+Manage kubectl contexts for different environments:
+
+```bash
+# List all available contexts
+./scripts/manage-contexts.sh list
+
+# Show current context
+./scripts/manage-contexts.sh current
+
+# Switch to environment
+./scripts/manage-contexts.sh switch local
+./scripts/manage-contexts.sh switch aws-prod
+
+# Validate environment connectivity
+./scripts/manage-contexts.sh validate aws-prod
+
+# Interactive AWS setup
+./scripts/manage-contexts.sh setup-aws-prod
+```
+
+## 📁 Environment Configuration
+
+Each environment has its own configuration file:
+
+- `environments/local/values.yaml` - Local k3d settings
+- `environments/aws-prod/values.yaml` - Production settings
+- `environments/aws-staging/values.yaml` - Staging settings
+
+### Customizing Environments
+
+Edit the environment values files to customize:
+- Resource limits
+- Storage configuration
+- Ingress settings
+- Database connections
+- Application settings
+
+## 🔐 Encrypted Secrets
+
+All environments use the same encrypted secrets system:
+
+```bash
+# Setup (one-time)
+./scripts/setup-secrets.sh
+
+# Edit secrets
+./scripts/edit-secrets.sh
+
+# View decrypted secrets
+./scripts/decrypt-secrets.sh
+```
+
+Secrets are automatically decrypted during deployment for all environments.
+
+## 🏗️ Infrastructure Requirements
+
+### Local Environment
+- k3d installed
+- Docker running
+- kubectl configured
+
+### AWS Environments
+- k3s cluster running on AWS
+- Tailscale connectivity to AWS instance
+- kubectl context configured for remote cluster
+- Ingress controller (Traefik recommended)
+- cert-manager for TLS (production)
 
