@@ -96,11 +96,14 @@ case $OUTPUT_FORMAT in
         if [ -n "$SPECIFIC_KEY" ]; then
             # Output specific key as environment variable
             value=$(sops --decrypt --extract "[\"$SPECIFIC_KEY\"]" "$SECRETS_FILE")
-            echo "export ${SPECIFIC_KEY^^}=\"$value\""
+            echo "export $SPECIFIC_KEY=\"$value\""
         else
-            # Convert YAML to env vars
+            # Convert YAML to env vars (filter out comments and empty lines)
             sops --decrypt "$SECRETS_FILE" | \
             yq eval -o=props | \
+            grep -v '^#' | \
+            grep -v '^$' | \
+            sed 's/ = /=/' | \
             sed 's/^/export /' | \
             sed 's/=/="/' | \
             sed 's/$/"/'
