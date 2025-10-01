@@ -110,19 +110,23 @@ check_secrets_setup() {
 prepare_secrets() {
     info "Decrypting secrets..." >&2
 
-    local jwt_secret
+    local jwt_secret postgres_password
     jwt_secret=$("$SCRIPT_DIR/decrypt-secrets.sh" --key jwtSecret)
+    postgres_password=$("$SCRIPT_DIR/decrypt-secrets.sh" --key postgresPassword)
 
     # Remove the export prefix and quotes for Helm
     jwt_secret=$(echo "$jwt_secret" | sed 's/export jwtSecret="//' | sed 's/"$//')
+    postgres_password=$(echo "$postgres_password" | sed 's/export postgresPassword="//' | sed 's/"$//')
 
     debug "JWT Secret length: ${#jwt_secret} characters" >&2
+    debug "PostgreSQL password length: ${#postgres_password} characters" >&2
 
     # Create temporary values file with decrypted secrets
     local temp_values="/tmp/joplin-secrets-values.yaml"
     cat > "$temp_values" << EOF
 secrets:
   jwtSecret: "$jwt_secret"
+  postgresPassword: "$postgres_password"
 EOF
 
     echo "$temp_values"

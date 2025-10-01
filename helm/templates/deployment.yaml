@@ -44,9 +44,9 @@ spec:
           value: "{{ .Values.jwtSecretFile }}"
         - name: POSTGRES_PASSWORD
           valueFrom:
-            secretKeyRef:
-              name: joplin-emelz-secret
-              key: POSTGRES_PASSWORD
+            configMapKeyRef:
+              name: joplin-emelz-secrets
+              key: postgres_password
         volumeMounts:
         - name: joplin-emelz-joplin
           mountPath: /home/joplin/.joplin
