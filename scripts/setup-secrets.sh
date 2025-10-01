@@ -95,17 +95,18 @@ create_encrypted_secrets() {
         # Generate a random JWT secret
         local jwt_secret=$(openssl rand -base64 32)
 
-        # Create unencrypted template
-        cat > "$secrets_file.tmp" << EOF
+        # Create unencrypted template in project root for proper path matching
+        local temp_file="$PROJECT_ROOT/secrets/secrets.yaml"
+        cat > "$temp_file" << EOF
 # Encrypted secrets for Joplin
 jwtSecret: "$jwt_secret"
 # Add more secrets here as needed
 # postgresPassword: "your-db-password"
 EOF
 
-        # Encrypt the file with SOPS
-        sops --encrypt "$secrets_file.tmp" > "$secrets_file"
-        rm "$secrets_file.tmp"
+        # Encrypt the file with SOPS (run from project root for path matching)
+        cd "$PROJECT_ROOT"
+        sops --encrypt --in-place "secrets/secrets.yaml"
 
         info "Encrypted secrets file created: $secrets_file"
     else

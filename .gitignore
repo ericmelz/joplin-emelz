@@ -1,2 +1,8 @@
 *~
 .DS_Store
+
+# Age encryption key - never commit this!
+secrets/age-key.txt
+
+# Temporary unencrypted files
+secrets/*.tmp
