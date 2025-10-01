@@ -2,13 +2,6 @@
 
 set -euo pipefail
 
-if [ -z "${POSTGRES_PASSWORD:-}" ]; then
-    echo "❌ Environment variable POSTGRES_PASSWORD must be set before running make k3d.  Example:"
-    echo "  export POSTGRESS_PASSWORD=s3cr3t! && make k3d"
-    exit 1
-fi
-  
-
 CLUSTER_NAME="joplin"
 
 VAR_DIR="$HOME/Data/var"
@@ -24,8 +17,10 @@ else
   k3d cluster create "$CLUSTER_NAME" \
       -p "22300:22300@loadbalancer" \
       --volume "$VAR_DIR:/mnt/var@server:0"
-
 fi
 
-echo "Deploying resources to k3d..."
-helm upgrade --install joplin-emelz ./helm --set postgresPassword=${POSTGRES_PASSWORD}
+echo "✅ k3d cluster '$CLUSTER_NAME' is ready!"
+echo ""
+echo "Next steps:"
+echo "  1. Deploy with encrypted secrets: ./scripts/deploy.sh"
+echo "  2. Or use legacy method: helm install joplin-server ./helm"

@@ -1,4 +1,4 @@
-.PHONY: k3d deploy deploy-encrypted setup-secrets edit-secrets
+.PHONY: k3d deploy deploy-encrypted setup-secrets edit-secrets cluster
 
 # Traditional cluster setup
 k3d:
@@ -18,6 +18,10 @@ deploy-encrypted:
 	bash scripts/k3d.sh
 	bash scripts/deploy.sh
 
-# Legacy deploy (will be deprecated)
+# Cluster-only setup (no deployment)
+cluster: k3d
+
+# Legacy deploy (now just creates cluster - use deploy-encrypted for full deployment)
 deploy: k3d
+
 

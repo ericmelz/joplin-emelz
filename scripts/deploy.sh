@@ -108,15 +108,15 @@ check_secrets_setup() {
 
 # Decrypt secrets and create temporary values file
 prepare_secrets() {
-    info "Decrypting secrets..."
+    info "Decrypting secrets..." >&2
 
     local jwt_secret
     jwt_secret=$("$SCRIPT_DIR/decrypt-secrets.sh" --key jwtSecret)
 
     # Remove the export prefix and quotes for Helm
-    jwt_secret=$(echo "$jwt_secret" | sed 's/export JWTSECRET="//' | sed 's/"$//')
+    jwt_secret=$(echo "$jwt_secret" | sed 's/export jwtSecret="//' | sed 's/"$//')
 
-    debug "JWT Secret length: ${#jwt_secret} characters"
+    debug "JWT Secret length: ${#jwt_secret} characters" >&2
 
     # Create temporary values file with decrypted secrets
     local temp_values="/tmp/joplin-secrets-values.yaml"
