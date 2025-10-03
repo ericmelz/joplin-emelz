@@ -177,13 +177,16 @@ prepare_secrets() {
     local jwt_secret postgres_password
     jwt_secret=$("$SCRIPT_DIR/decrypt-secrets.sh" --key jwtSecret)
     postgres_password=$("$SCRIPT_DIR/decrypt-secrets.sh" --key postgresPassword)
+    mailer_auth_password=$("$SCRIPT_DIR/decrypt-secrets.sh" --key mailerAuthPassword)    
 
     # Remove the export prefix and quotes for Helm
     jwt_secret=$(echo "$jwt_secret" | sed 's/export jwtSecret="//' | sed 's/"$//')
     postgres_password=$(echo "$postgres_password" | sed 's/export postgresPassword="//' | sed 's/"$//')
+    mailer_auth_password=$(echo "$mailer_auth_password" | sed 's/export mailerAuthPassword="//' | sed 's/"$//')
 
     debug "JWT Secret length: ${#jwt_secret} characters" >&2
     debug "PostgreSQL password length: ${#postgres_password} characters" >&2
+    debug "Mailer Auth password length: ${#mailer_auth_password} characters" >&2
 
     # Create temporary values file with decrypted secrets
     local temp_values="/tmp/joplin-secrets-values.yaml"
@@ -191,6 +194,7 @@ prepare_secrets() {
 secrets:
   jwtSecret: "$jwt_secret"
   postgresPassword: "$postgres_password"
+  mailerAuthPassword: "$mailer_auth_password"
 EOF
 
     echo "$temp_values"

@@ -43,12 +43,31 @@ spec:
         - name: POSTGRES_USER
           value: "{{ .Values.database.user }}"
         - name: JWT_SECRET_FILE
-          value: "/run/secrets/jwt_secret"
+          value: "{{ .Values.app.jwtSecretFile }}"
+        - name: MAILER_ENABLED
+          value: "{{ .Values.mailer.enabled }}"
+        - name: MAILER_HOST
+          value: "{{ .Values.mailer.host }}"
+        - name: MAILER_PORT
+          value: "{{ .Values.mailer.port }}"
+        - name: MAILER_SECURITY
+          value: "{{ .Values.mailer.security }}"
+        - name: MAILER_AUTH_USER
+          value: "{{ .Values.mailer.authUser }}"
+        - name: MAILER_NOREPLY_EMAIL
+          value: "{{ .Values.mailer.noreplyEmail }}"
+        - name: MAILER_NOREPLY_NAME
+          value: "{{ .Values.mailer.noreplyName }}"
         - name: POSTGRES_PASSWORD
           valueFrom:
             configMapKeyRef:
               name: joplin-emelz-secrets
               key: postgres_password
+        - name: MAILER_AUTH_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: joplin-emelz-secrets
+              key: mailer_auth_password
         volumeMounts:
         - name: joplin-emelz-joplin
           mountPath: /home/joplin/.joplin

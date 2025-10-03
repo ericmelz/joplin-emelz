@@ -15,6 +15,15 @@ database:
   name: joplin-test2
   user: joplin
 
+mailer:
+  enabled: 1
+  host: smtp.gmail.com
+  port: 587
+  security: starttls
+  authUser: no-reply@emelz.org
+  noreplyEmail: no-reply@emelz.org
+  noreplyName: Joplin
+
 # Storage configuration for AWS k3s
 storage:
   type: dynamic

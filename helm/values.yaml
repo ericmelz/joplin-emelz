@@ -7,6 +7,7 @@ app:
   baseUrl: http://localhost:22300
   port: 22300
   cookieSecure: false
+  jwtSecretFile: /run/secrets/jwt_secret
 
 # Database configuration
 database:
@@ -16,20 +17,16 @@ database:
   name: joplin
   user: joplin
 
-# Legacy compatibility (will be deprecated)
-deploymentEnv: dev
-appPort: "{{ .Values.app.port }}"
-appBaseUrl: "{{ .Values.app.baseUrl }}"
-cookieSecure: "{{ .Values.app.cookieSecure }}"
-dbClient: "{{ .Values.database.client }}"
-postgresHost: "{{ .Values.database.host }}"
-postgresPort: "{{ .Values.database.port }}"
-postgresDatabase: "{{ .Values.database.name }}"
-postgresUser: "{{ .Values.database.user }}"
-postgresPassword: ""
-postgresPasswordFile: /run/secrets/pg_password
-jwtSecretFile: /run/secrets/jwt_secret
-
+# Mailer configuration
+mailer:
+  enabled: 1
+  host: smtp.gmail.com
+  port: 587
+  security: starttls
+  authUser: no-reply@emelz.org
+  noreplyEmail: no-reply@emelz.org
+  noreplyName: Joplin
+  
 # Storage configuration
 storage:
   type: hostPath  # hostPath, dynamic, or pvc
