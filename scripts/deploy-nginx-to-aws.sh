@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy nginx configuration to AWS instance via SSH and Tailscale
+# Deploy nginx configuration to AWS instance via SSH over Tailscale
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,6 +12,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Default values
+AWS_HOST="100.81.81.81"
+SSH_USER="ubuntu"
+DOMAIN="joplin-test2.emelz.org"
+ENABLE_SSL=true
+DRY_RUN=false
 
 info() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -34,20 +41,13 @@ usage() {
     echo "Deploy nginx configuration to AWS instance via Tailscale"
     echo ""
     echo "Options:"
-    echo "  --host HOST         AWS instance Tailscale hostname or IP (default: rs2423.porgy-sole.ts.net)"
-    echo "  --user USER         SSH user (default: ubuntu)"
-    echo "  --domain DOMAIN     Domain name (default: joplin.emelz.org)"
-    echo "  --no-ssl            Skip SSL setup (test HTTP first)"
-    echo "  --dry-run           Show commands without executing"
-    echo "  --help              Show this help message"
+    echo "  --host HOST           AWS instance Tailscale hostname or IP (default: $AWS_HOST)"
+    echo "  --user USER           SSH user (default: $SSH_USER)"
+    echo "  --domain DOMAIN       Domain name (default: $DOMAIN)"
+    echo "  --no-ssl              Skip SSL setup (test HTTP first)"
+    echo "  --dry-run             Show commands without executing"
+    echo "  --help                Show this help message"
 }
-
-# Default values
-AWS_HOST="rs2423.porgy-sole.ts.net"
-SSH_USER="ubuntu"
-DOMAIN="joplin.emelz.org"
-ENABLE_SSL=true
-DRY_RUN=false
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -88,13 +88,13 @@ done
 test_connectivity() {
     info "Testing connectivity to $AWS_HOST"
 
-    if ping -c 1 "$AWS_HOST" >/dev/null 2>&1; then
-        info "✅ Can ping $AWS_HOST"
-    else
-        error "❌ Cannot ping $AWS_HOST - check Tailscale connection"
-        echo "Run: tailscale status"
-        exit 1
-    fi
+    # if ping -c 1 "$AWS_HOST" >/dev/null 2>&1; then
+    #     info "✅ Can ping $AWS_HOST"
+    # else
+    #     error "❌ Cannot ping $AWS_HOST - check Tailscale connection"
+    #     echo "Run: tailscale status"
+    #     exit 1
+    # fi
 
     if ssh -o ConnectTimeout=5 -o BatchMode=yes "$SSH_USER@$AWS_HOST" "echo 'SSH OK'" 2>/dev/null; then
         info "✅ SSH connection works"

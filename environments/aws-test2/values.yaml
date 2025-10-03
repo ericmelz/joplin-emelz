@@ -1,0 +1,50 @@
+# AWS Staging k3s environment values
+environment: aws-test2
+namespace: joplin-test2
+
+# Application configuration
+app:
+  baseUrl: https://joplin-test2.emelz.org
+  port: 22300
+  cookieSecure: true
+
+# Database configuration
+database:
+  host: 100.102.105.59  # Tailscale hostname
+  port: 55434
+  name: joplin-test2
+  user: joplin
+
+# Storage configuration for AWS k3s
+storage:
+  type: dynamic
+  className: local-path
+  hostPath: null
+  size: 10Gi  # Smaller for staging
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 22300
+  nodePort: 30302  # Different port from other joplin instances
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  host: joplin-test2.emelz.org
+  tls: true
+
+# Resource limits (staging - smaller than prod)
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+replicas: 1
+nodeSelector: {}
+tolerations: []
+affinity: {}
