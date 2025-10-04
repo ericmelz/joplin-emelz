@@ -1,0 +1,60 @@
+# AWS Staging k3s environment values
+environment: onprem-prod
+namespace: joplin-prod
+ntpServer: 192.168.2.6:123
+
+# Application configuration
+app:
+  baseUrl: https://joplin.emelz.org
+  port: 22300
+  cookieSecure: true
+
+# Database configuration
+database:
+  host: 100.102.105.59  # Tailscale hostname
+  port: 55434
+  name: joplin_prod
+  user: joplin
+
+mailer:
+  enabled: 1
+  host: smtp.gmail.com
+  port: 587
+  security: starttls
+  authUser: no-reply@emelz.org
+  noreplyEmail: no-reply@emelz.org
+  noreplyName: Joplin
+
+# Storage configuration for AWS k3s
+storage:
+  type: dynamic
+  className: local-path
+  hostPath: null
+  size: 10Gi  # Smaller for staging
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 22300
+  nodePort: 30302  # Different port from other joplin instances
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: traefik
+  host: joplin.emelz.org
+  tls: true
+
+# Resource limits (production-grade)
+resources:
+  limits:
+    cpu: 2000m
+    memory: 1Gi
+  requests:
+    cpu: 500m
+    memory: 256Mi
+
+replicas: 1
+nodeSelector: {}
+tolerations: []
+affinity: {}

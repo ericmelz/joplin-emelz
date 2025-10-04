@@ -58,6 +58,11 @@ spec:
           value: "{{ .Values.mailer.noreplyEmail }}"
         - name: MAILER_NOREPLY_NAME
           value: "{{ .Values.mailer.noreplyName }}"
+        - name: NTP_SERVER
+          value: "{{ .Values.ntpServer }}"
+        # Optional temporary bypass if UDP/123 is blocked:
+        # - name: MAX_TIME_DRIFT
+        #   value: "0"
         - name: POSTGRES_PASSWORD
           valueFrom:
             configMapKeyRef:

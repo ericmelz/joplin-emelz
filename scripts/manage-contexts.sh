@@ -39,6 +39,7 @@ usage() {
     echo "  switch ENV           Switch to environment context"
     echo "  validate ENV         Validate environment connectivity"
     echo "  setup-aws-prod       Interactive setup for AWS production context"
+    echo "  setup-onprem-prod    Interactive setup for On-prem production context"
     echo "  help                 Show this help message"
     echo ""
     echo "Environments:"
@@ -59,6 +60,7 @@ get_context_for_env() {
     case "$env" in
         local) echo "k3d-joplin" ;;
         aws-prod) echo "k3s-aws-prod" ;;
+        onprem-prod) echo "k3s-onprem-prod" ;;
         aws-staging) echo "k3s-aws-staging" ;;
         *) error "Unknown environment: $env"; exit 1 ;;
     esac
@@ -71,6 +73,7 @@ list_contexts() {
     info "Environment mappings:"
     echo "  local      → k3d-joplin"
     echo "  aws-prod   → k3s-aws-prod"
+    echo "  onprem-prod → k3s-onprem-prod"
     echo "  aws-staging → k3s-aws-staging"
 }
 
@@ -83,6 +86,7 @@ show_current() {
     case "$current_context" in
         k3d-joplin) info "Environment: local" ;;
         k3s-aws-prod) info "Environment: aws-prod" ;;
+        k3s-onprem-prod) info "Environment: onprem-prod" ;;
         k3s-aws-staging) info "Environment: aws-staging" ;;
         *) warn "Context not managed by this script" ;;
     esac
@@ -131,7 +135,8 @@ validate_environment() {
         return 1
     fi
 
-    if [[ "$env" == "aws-prod" ]] || [[ "$env" == "aws-staging" ]]; then
+    if [[ "$env" == "aws-prod" ]] || [[ "$env" == "aws-staging" ]] \
+       || [[ "$env" == "onprem-prod" ]]; then
         info "Testing Tailscale connectivity..."
         # Try to resolve the Tailscale hostname
         if nslookup rs2423.porgy-sole.ts.net >/dev/null 2>&1; then
@@ -144,12 +149,55 @@ validate_environment() {
     info "Environment validation complete"
 }
 
+setup_onprem_prod() {
+    info "Interactive setup for On-prem production k3s cluster"
+    echo
+    warn "Prerequisites:"
+    echo "  1. Tailscale connected and can reach On-prem instance"
+    echo "  2. k3s running on AWS instance"
+    echo "  3. kubectl installed locally"
+    echo
+
+    read -p "Enter On-prem instance Tailscale IP or hostname: " onprem_host
+    read -p "Enter k3s API port (default: 6443): " api_port
+    api_port=${api_port:-6443}
+
+    info "Testing connectivity to $onprem_host:$api_port..."
+    if ! nc -z "$onprem_host" "$api_port" 2>/dev/null; then
+        error "Cannot connect to $onprem_host:$api_port"
+        echo "Check:"
+        echo "  1. Tailscale is connected: tailscale status"
+        echo "  2. k3s is running on Onprem instance"
+        echo "  3. Firewall allows port $api_port"
+        exit 1
+    fi
+
+    info "Connectivity OK. You'll need to manually configure the context."
+    echo
+    echo "On your Onprem k3s instance, run:"
+    echo "  sudo cat /etc/rancher/k3s/k3s.yaml"
+    echo
+    echo "Then configure kubectl context locally:"
+    echo "  kubectl config set-cluster k3s-onprem-prod \\"
+    echo "    --server=https://$onprem_host:$api_port \\"
+    echo "    --certificate-authority=<BASE64_CA_FROM_K3S_YAML>"
+    echo
+    echo "  kubectl config set-credentials k3s-onprem-prod \\"
+    echo "    --token=<TOKEN_FROM_K3S_YAML>"
+    echo
+    echo "  kubectl config set-context k3s-onprem-prod \\"
+    echo "    --cluster=k3s-onprem-prod \\"
+    echo "    --user=k3s-onprem-prod"
+    echo
+    echo "Test with: $0 validate onprem-prod"
+}
+
 setup_aws_prod() {
     info "Interactive setup for AWS production k3s cluster"
     echo
     warn "Prerequisites:"
     echo "  1. Tailscale connected and can reach AWS instance"
-    echo "  2. k3s running on AWS instance"
+    echo "  2. k3s running on Onprem instance"
     echo "  3. kubectl installed locally"
     echo
 
@@ -175,7 +223,7 @@ setup_aws_prod() {
     echo "Then configure kubectl context locally:"
     echo "  kubectl config set-cluster k3s-aws-prod \\"
     echo "    --server=https://$aws_host:$api_port \\"
-    echo "    --certificate-authority-data=<BASE64_CA_FROM_K3S_YAML>"
+    echo "    --certificate-authority=<BASE64_CA_FROM_K3S_YAML>"
     echo
     echo "  kubectl config set-credentials k3s-aws-prod \\"
     echo "    --token=<TOKEN_FROM_K3S_YAML>"
@@ -213,6 +261,9 @@ case "${1:-help}" in
         ;;
     setup-aws-prod)
         setup_aws_prod
+        ;;
+    setup-onprem-prod)
+        setup_onprem_prod
         ;;
     help)
         usage

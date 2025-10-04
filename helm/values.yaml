@@ -1,6 +1,7 @@
 # Default values - override with environment-specific values
 environment: local
 namespace: default
+ntpServer: time.google.com:123
 
 # Application configuration
 app:
