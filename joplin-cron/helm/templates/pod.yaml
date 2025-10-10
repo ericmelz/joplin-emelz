@@ -15,12 +15,6 @@ spec:
     imagePullPolicy: {{ .Values.image.pullPolicy }}
     command: ["/bin/bash", "-c", "--"]
     args: ["while true; do sleep 30; done;"]
-    env:
-    - name: POSTGRES_PASSWORD
-      valueFrom:
-        configMapKeyRef:
-          name: joplin-cron-secrets
-          key: postgres_password
     volumeMounts:
     - name: notes-data
       mountPath: /notes_data

@@ -5,7 +5,7 @@ metadata:
 data:
     accounts.json: |
         [
-            {"username": "eric@emelz.org", "password": {{ .Values.secrets.database.password }} },
-            {"username": "randi@emelz.org", "password": "fill-this-in" }
+            {"username": "eric@emelz.org", "password": {{ .Values.secrets.joplinPasswords.ericAtEmelzDotOrg | quote }} },
+            {"username": "randi@emelz.org", "password": {{ .Values.secrets.joplinPasswords.randiAtEmelzDotOrg | quote }} }
         ]
     
