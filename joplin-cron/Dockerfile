@@ -30,5 +30,9 @@ RUN pip3 install --no-cache-dir --break-system-packages \
 # Create working directory
 WORKDIR /app
 
+# Copy backup script
+COPY backup.py /app/backup.py
+RUN chmod +x /app/backup.py
+
 # Set default command
 CMD ["/bin/bash"]

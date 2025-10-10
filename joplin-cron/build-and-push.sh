@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-IMAGE_NAME="ghcr.io/ericmelz/joplin-cron"
+IMAGE_NAME="ericmelz/joplin-cron"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Functions
@@ -126,23 +126,8 @@ fi
 
 info "Pushing image to GitHub Container Registry..."
 
-# Check if logged in to ghcr.io
-if ! docker info 2>/dev/null | grep -q "ghcr.io"; then
-    warn "Not logged in to ghcr.io"
-    echo ""
-    echo "To authenticate, run:"
-    echo "  echo \$GITHUB_TOKEN | docker login ghcr.io -u ericmelz --password-stdin"
-    echo ""
-    echo "Or create a GitHub Personal Access Token with 'write:packages' scope:"
-    echo "  https://github.com/settings/tokens/new?scopes=write:packages"
-    echo ""
-    read -p "Continue without pushing? [y/N] " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-    exit 0
-fi
+# Note: Login check removed - just attempt push and let Docker handle auth
+# If not logged in, Docker will show a clear error message
 
 if docker push "${FULL_IMAGE}"; then
     info "✅ Push successful: ${FULL_IMAGE}"
