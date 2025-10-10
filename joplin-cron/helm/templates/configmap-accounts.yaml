@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: joplin-backup-accounts
+data:
+    accounts.json: |
+        [
+            {"username": "eric@emelz.org", "password": {{ .Values.secrets.database.password }} },
+            {"username": "randi@emelz.org", "password": "fill-this-in" }
+        ]
+    

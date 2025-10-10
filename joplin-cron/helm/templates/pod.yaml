@@ -23,7 +23,13 @@ spec:
     volumeMounts:
     - name: notes-data
       mountPath: /notes_data
+    - name: accounts
+      mountPath: /config
   volumes:
     - name: notes-data
       persistentVolumeClaim:
         claimName: notes-data-pvc
+    - name: accounts
+      configMap:
+        name: joplin-backup-accounts
+	
