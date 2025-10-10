@@ -123,22 +123,84 @@ def configure_joplin(username, password):
     logger.info(f"Joplin configured for {username}")
 
 
+def verify_notes_exist(username):
+    """
+    Verify that notes were actually downloaded
+
+    Args:
+        username: Account username (for logging)
+
+    Returns:
+        bool: True if notes exist, False otherwise
+    """
+    try:
+        # Try to get status which shows note count
+        status_result = run_command("joplin status", check=False)
+        logger.debug(f"Joplin status output: {status_result.stdout}")
+
+        # Also try listing notes
+        ls_result = run_command("joplin ls", check=False)
+        logger.debug(f"Joplin ls output: {ls_result.stdout}")
+
+        # Check if status shows any notes
+        if status_result.stdout:
+            # Look for "Notes:" line in status
+            for line in status_result.stdout.split('\n'):
+                if 'notes:' in line.lower() or 'items:' in line.lower():
+                    logger.info(f"Status: {line.strip()}")
+
+        # If there are notes, ls output won't be empty
+        has_notes = bool(ls_result.stdout and ls_result.stdout.strip())
+
+        if has_notes:
+            logger.info(f"Verified notes exist for {username}")
+            # Show first few notes
+            lines = ls_result.stdout.strip().split('\n')[:5]
+            for line in lines:
+                logger.info(f"  - {line}")
+        else:
+            logger.warning(f"No notes found in 'joplin ls' for {username}")
+
+        return has_notes
+    except Exception as e:
+        logger.warning(f"Could not verify notes for {username}: {e}")
+        return False
+
+
 def sync_notes(username):
     """
-    Sync notes from Joplin Server
+    Sync notes from Joplin Server and wait for completion
 
     Args:
         username: Account username (for logging)
     """
+    import time
+
     logger.info(f"Syncing notes for {username}")
 
     try:
-        result = run_command("joplin sync")
-        logger.info(f"Sync completed for {username}")
+        # Run multiple syncs to ensure everything is downloaded
+        # Joplin sync is async and may need multiple passes
+        for i in range(1, 4):
+            logger.info(f"Running sync pass {i}/3...")
+            result = run_command("joplin sync")
 
-        # Log sync output if verbose
-        if result.stdout:
-            logger.debug(f"Sync output: {result.stdout}")
+            # Log sync output
+            if result.stdout:
+                logger.debug(f"Sync pass {i} output: {result.stdout}")
+
+            logger.info(f"Sync pass {i} completed")
+
+            # Wait between syncs
+            if i < 3:
+                time.sleep(3)
+
+        # Final wait for database writes
+        logger.info("Waiting for database to flush...")
+        time.sleep(3)
+
+        # Verify notes were actually downloaded (informational only)
+        verify_notes_exist(username)
 
     except subprocess.CalledProcessError as e:
         raise JoplinBackupError(f"Sync failed for {username}: {e}")
@@ -153,7 +215,7 @@ def export_backup(username, backup_dir):
         backup_dir: Directory to store backup
 
     Returns:
-        Path to created backup file
+        Path to created backup file or None if no data to export
     """
     today = datetime.now().strftime(DATE_FORMAT)
     backup_file = backup_dir / f"{today}.jex"
@@ -161,7 +223,19 @@ def export_backup(username, backup_dir):
     logger.info(f"Exporting backup for {username} to {backup_file}")
 
     try:
-        run_command(f"joplin export {backup_file} --format jex")
+        result = run_command(f"joplin export {backup_file} --format jex", check=False)
+
+        # Check if export failed due to no data
+        if result.returncode != 0:
+            if "no data to export" in result.stdout.lower():
+                logger.warning(f"No data to export for {username} - account may be empty")
+                return None
+            else:
+                # Real error
+                logger.error(f"Export command failed with exit code {result.returncode}")
+                logger.error(f"Stdout: {result.stdout}")
+                logger.error(f"Stderr: {result.stderr}")
+                raise JoplinBackupError(f"Export failed for {username}")
 
         if not backup_file.exists():
             raise JoplinBackupError(f"Backup file not created: {backup_file}")
