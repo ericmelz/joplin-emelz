@@ -8,7 +8,7 @@ metadata:
     environment: {{ .Values.environment }}
 spec:
   # Schedule: 12:20 PM America/Los_Angeles (PST/PDT)
-  schedule: "57 12 * * *"
+  schedule: "03 13 * * *"
   timeZone: "America/Los_Angeles"
 
   # Keep last 3 successful jobs and 1 failed job for debugging
