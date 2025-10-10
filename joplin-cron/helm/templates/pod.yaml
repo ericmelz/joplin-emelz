@@ -10,8 +10,9 @@ spec:
       - name: ndots
         value: "1"
   containers:
-  - name: ubuntu
-    image: ubuntu:24.04
+  - name: joplin-cron
+    image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+    imagePullPolicy: {{ .Values.image.pullPolicy }}
     command: ["/bin/bash", "-c", "--"]
     args: ["while true; do sleep 30; done;"]
     env:

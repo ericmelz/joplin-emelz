@@ -1,0 +1,19 @@
+# Ignore Helm charts and environments
+helm/
+environments/
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore documentation
+*.md
+README*
+
+# Ignore build scripts
+build-and-push.sh
+
+# Ignore backup files
+*~
+*.bak
+.DS_Store
