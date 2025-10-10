@@ -16,14 +16,55 @@ This project provides a containerized backup solution that:
 - **Backup Script**: `/app/backup.py`
 - **Accounts Config**: `/config/accounts.json` (mounted from ConfigMap)
 - **Backup Storage**: `/notes_data/backups/` (mounted PVC)
+- **Schedule**: Daily at 12:20 PM America/Los_Angeles (PST/PDT)
+
+## CronJob Configuration
+
+The backup runs automatically as a Kubernetes CronJob:
+
+- **Schedule**: `20 12 * * *` (12:20 PM)
+- **Timezone**: `America/Los_Angeles` (handles PST/PDT automatically)
+- **Concurrency**: `Forbid` (won't start if previous job still running)
+- **History**: Keeps last 3 successful jobs, 1 failed job
+- **Cleanup**: Completed jobs removed after 1 hour
+
+### Check CronJob Status
+
+```bash
+# View CronJob
+kubectl get cronjob joplin-backup -n joplin-prod
+
+# View recent jobs
+kubectl get jobs -n joplin-prod
+
+# View job logs
+kubectl logs job/joplin-backup-<timestamp> -n joplin-prod
+```
+
+### Manually Trigger Backup
+
+```bash
+# Create a one-time job from the CronJob
+kubectl create job --from=cronjob/joplin-backup joplin-backup-manual -n joplin-prod
+
+# Watch job progress
+kubectl get jobs -n joplin-prod -w
+
+# View logs
+kubectl logs job/joplin-backup-manual -n joplin-prod
+```
 
 ## Running the Backup Script
 
-### Inside the Container (Manual Testing)
+### Manual Testing (without CronJob)
 
-**1. Get a shell in the pod:**
+**1. Get a shell in a running job pod:**
 ```bash
-kubectl exec -it joplin-cron -- /bin/bash
+# Find the pod name
+kubectl get pods -n joplin-prod | grep joplin-backup
+
+# Exec into it
+kubectl exec -it joplin-backup-<timestamp>-<hash> -n joplin-prod -- /bin/bash
 ```
 
 **2. Verify the script is present:**

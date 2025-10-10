@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: joplin-backup
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: joplin-backup
+    environment: {{ .Values.environment }}
+spec:
+  # Schedule: 12:20 PM America/Los_Angeles (PST/PDT)
+  schedule: "20 12 * * *"
+  timeZone: "America/Los_Angeles"
+
+  # Keep last 3 successful jobs and 1 failed job for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+  # Don't start new job if previous one is still running
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    spec:
+      # Clean up completed jobs after 1 hour
+      ttlSecondsAfterFinished: 3600
+
+      template:
+        metadata:
+          labels:
+            app: joplin-backup
+            environment: {{ .Values.environment }}
+        spec:
+          restartPolicy: OnFailure
+
+          dnsPolicy: ClusterFirst
+          dnsConfig:
+            options:
+              - name: ndots
+                value: "1"
+
+          containers:
+          - name: joplin-backup
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+            # Run the backup script
+            command: ["python3"]
+            args: ["/app/backup.py"]
+
+            # Set timezone in container (for logging)
+            env:
+            - name: TZ
+              value: "America/Los_Angeles"
+
+            volumeMounts:
+            - name: notes-data
+              mountPath: /notes_data
+            - name: accounts
+              mountPath: /config
+
+          volumes:
+          - name: notes-data
+            persistentVolumeClaim:
+              claimName: notes-data-pvc
+          - name: accounts
+            configMap:
+              name: joplin-backup-accounts
