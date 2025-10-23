@@ -5,6 +5,13 @@ Joplin Backup Script
 Reads account credentials from /config/accounts.json and performs daily backups
 for each account. Retains 14 days of backup history.
 
+Features:
+- Server availability check before backup
+- Resource validation to detect corrupted downloads
+- Backup integrity comparison with previous backups
+- Retry logic for transient failures
+- Detailed error reporting
+
 Usage:
     python3 /app/backup.py
 """
@@ -13,6 +20,10 @@ import json
 import os
 import subprocess
 import sys
+import time
+import tarfile
+import urllib.request
+import urllib.error
 from datetime import datetime, timedelta
 from pathlib import Path
 import shutil
@@ -33,6 +44,9 @@ JOPLIN_CONFIG_DIR = os.path.expanduser("~/.config/joplin")
 JOPLIN_SERVER_URL = "https://joplin.emelz.org"
 RETENTION_DAYS = 14
 DATE_FORMAT = "%Y-%m-%d"
+MAX_SYNC_RETRIES = 3
+SYNC_RETRY_DELAY = 10  # seconds
+BACKUP_SIZE_TOLERANCE = 0.15  # 15% - alert if backup shrinks by more than this
 
 
 class JoplinBackupError(Exception):
@@ -123,6 +137,36 @@ def configure_joplin(username, password):
     logger.info(f"Joplin configured for {username}")
 
 
+def check_server_availability():
+    """
+    Check if Joplin server is reachable before attempting backup
+
+    Returns:
+        bool: True if server is available, False otherwise
+    """
+    logger.info(f"Checking server availability: {JOPLIN_SERVER_URL}")
+
+    try:
+        # Try to reach the server's API ping endpoint
+        ping_url = f"{JOPLIN_SERVER_URL}/api/ping"
+        req = urllib.request.Request(ping_url, method='GET')
+
+        with urllib.request.urlopen(req, timeout=10) as response:
+            if response.status == 200:
+                logger.info("✅ Server is reachable")
+                return True
+            else:
+                logger.error(f"❌ Server returned status {response.status}")
+                return False
+
+    except urllib.error.URLError as e:
+        logger.error(f"❌ Server unreachable: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"❌ Server check failed: {e}")
+        return False
+
+
 def verify_notes_exist(username):
     """
     Verify that notes were actually downloaded
@@ -169,46 +213,176 @@ def verify_notes_exist(username):
 
 def sync_notes(username):
     """
-    Sync notes from Joplin Server and wait for completion
+    Sync notes from Joplin Server and wait for completion with retry logic
 
     Args:
         username: Account username (for logging)
     """
-    import time
-
     logger.info(f"Syncing notes for {username}")
 
+    for retry in range(MAX_SYNC_RETRIES):
+        try:
+            # Run multiple syncs to ensure everything is downloaded
+            # Joplin sync is async and may need multiple passes
+            sync_errors = []
+
+            for i in range(1, 4):
+                logger.info(f"Running sync pass {i}/3...")
+                result = run_command("joplin sync", check=False)
+
+                # Check for errors in sync output
+                if result.returncode != 0:
+                    error_msg = f"Sync pass {i} failed with exit code {result.returncode}"
+                    logger.error(error_msg)
+                    if result.stderr:
+                        logger.error(f"Stderr: {result.stderr}")
+                    sync_errors.append(error_msg)
+
+                # Look for error indicators in output
+                if result.stdout:
+                    logger.debug(f"Sync pass {i} output: {result.stdout}")
+
+                    # Check for common error patterns
+                    error_patterns = ['error', 'failed', 'cannot', '404', 'timeout']
+                    for pattern in error_patterns:
+                        if pattern in result.stdout.lower():
+                            logger.warning(f"Potential issue detected in sync output: {pattern}")
+
+                logger.info(f"Sync pass {i} completed")
+
+                # Wait between syncs
+                if i < 3:
+                    time.sleep(3)
+
+            # If we had errors, raise exception to trigger retry
+            if sync_errors:
+                raise JoplinBackupError(f"Sync had errors: {'; '.join(sync_errors)}")
+
+            # Final wait for database writes
+            logger.info("Waiting for database to flush...")
+            time.sleep(3)
+
+            # Verify notes were actually downloaded
+            if not verify_notes_exist(username):
+                raise JoplinBackupError(f"No notes found after sync for {username}")
+
+            # Success - exit retry loop
+            logger.info(f"Sync completed successfully for {username}")
+            return
+
+        except (subprocess.CalledProcessError, JoplinBackupError) as e:
+            if retry < MAX_SYNC_RETRIES - 1:
+                logger.warning(f"Sync attempt {retry + 1}/{MAX_SYNC_RETRIES} failed: {e}")
+                logger.info(f"Retrying in {SYNC_RETRY_DELAY} seconds...")
+                time.sleep(SYNC_RETRY_DELAY)
+            else:
+                logger.error(f"All {MAX_SYNC_RETRIES} sync attempts failed")
+                raise JoplinBackupError(f"Sync failed for {username} after {MAX_SYNC_RETRIES} attempts: {e}")
+
+
+def validate_backup_resources(backup_file):
+    """
+    Validate resources in backup file to detect corruption
+
+    Args:
+        backup_file: Path to .jex backup file
+
+    Returns:
+        tuple: (is_valid, corrupted_count, total_resources)
+    """
+    logger.info(f"Validating resources in {backup_file}")
+
     try:
-        # Run multiple syncs to ensure everything is downloaded
-        # Joplin sync is async and may need multiple passes
-        for i in range(1, 4):
-            logger.info(f"Running sync pass {i}/3...")
-            result = run_command("joplin sync")
+        corrupted_resources = []
+        total_resources = 0
 
-            # Log sync output
-            if result.stdout:
-                logger.debug(f"Sync pass {i} output: {result.stdout}")
+        with tarfile.open(backup_file, 'r') as tar:
+            for member in tar.getmembers():
+                # Check resource files
+                if member.name.startswith('resources/') and member.isfile():
+                    total_resources += 1
 
-            logger.info(f"Sync pass {i} completed")
+                    # Check for suspiciously small files (likely error pages)
+                    if member.size < 100:
+                        # Extract and check content
+                        try:
+                            f = tar.extractfile(member)
+                            if f:
+                                content = f.read(100).decode('utf-8', errors='ignore')
+                                # Check for error indicators
+                                if any(err in content.lower() for err in ['404', 'not found', 'error', '<html>']):
+                                    corrupted_resources.append((member.name, member.size, content[:50]))
+                        except Exception:
+                            pass
 
-            # Wait between syncs
-            if i < 3:
-                time.sleep(3)
+        corrupted_count = len(corrupted_resources)
 
-        # Final wait for database writes
-        logger.info("Waiting for database to flush...")
-        time.sleep(3)
+        if corrupted_count > 0:
+            logger.error(f"❌ Found {corrupted_count} corrupted resources out of {total_resources}")
+            # Log first few corrupted files
+            for name, size, content in corrupted_resources[:5]:
+                logger.error(f"  - {name}: {size} bytes - {content}")
+            if corrupted_count > 5:
+                logger.error(f"  ... and {corrupted_count - 5} more")
+            return False, corrupted_count, total_resources
+        else:
+            logger.info(f"✅ All {total_resources} resources validated successfully")
+            return True, 0, total_resources
 
-        # Verify notes were actually downloaded (informational only)
-        verify_notes_exist(username)
+    except Exception as e:
+        logger.error(f"Failed to validate backup: {e}")
+        return False, -1, -1
 
-    except subprocess.CalledProcessError as e:
-        raise JoplinBackupError(f"Sync failed for {username}: {e}")
+
+def compare_with_previous_backup(username, backup_dir, current_backup):
+    """
+    Compare current backup with previous backup to detect anomalies
+
+    Args:
+        username: Account username
+        backup_dir: Directory containing backups
+        current_backup: Path to current backup file
+    """
+    logger.info(f"Comparing with previous backup for {username}")
+
+    try:
+        current_size = current_backup.stat().st_size
+
+        # Find most recent previous backup
+        backups = sorted([f for f in backup_dir.glob("*.jex") if f != current_backup])
+
+        if not backups:
+            logger.info("No previous backup to compare with")
+            return
+
+        previous_backup = backups[-1]
+        previous_size = previous_backup.stat().st_size
+
+        logger.info(f"Previous backup: {previous_backup.name} ({previous_size:,} bytes)")
+        logger.info(f"Current backup:  {current_backup.name} ({current_size:,} bytes)")
+
+        # Calculate size difference
+        if previous_size > 0:
+            size_ratio = current_size / previous_size
+            size_change_pct = ((current_size - previous_size) / previous_size) * 100
+
+            logger.info(f"Size change: {size_change_pct:+.1f}%")
+
+            # Alert if backup shrunk significantly
+            if size_ratio < (1 - BACKUP_SIZE_TOLERANCE):
+                logger.error(f"⚠️  WARNING: Backup size decreased by {abs(size_change_pct):.1f}%!")
+                logger.error(f"⚠️  This may indicate a corrupted or incomplete backup")
+                logger.error(f"⚠️  Previous: {previous_size:,} bytes, Current: {current_size:,} bytes")
+            elif size_change_pct < -5:
+                logger.warning(f"⚠️  Backup size decreased by {abs(size_change_pct):.1f}%")
+
+    except Exception as e:
+        logger.warning(f"Could not compare with previous backup: {e}")
 
 
 def export_backup(username, backup_dir):
     """
-    Export notes to JEX backup file
+    Export notes to JEX backup file with validation
 
     Args:
         username: Account username
@@ -242,6 +416,16 @@ def export_backup(username, backup_dir):
 
         file_size = backup_file.stat().st_size
         logger.info(f"Backup created: {backup_file} ({file_size:,} bytes)")
+
+        # Validate backup integrity
+        is_valid, corrupted_count, total_resources = validate_backup_resources(backup_file)
+
+        if not is_valid and corrupted_count > 0:
+            logger.error(f"❌ Backup validation failed: {corrupted_count} corrupted resources")
+            raise JoplinBackupError(f"Backup contains {corrupted_count} corrupted resources - likely due to server unavailability during sync")
+
+        # Compare with previous backup
+        compare_with_previous_backup(username, backup_dir, backup_file)
 
         return backup_file
 
@@ -348,12 +532,18 @@ def backup_account(account):
 
 
 def main():
-    """Main backup routine"""
+    """Main backup routine with pre-flight checks"""
     logger.info("=" * 60)
     logger.info("Joplin Backup Script Starting")
     logger.info("=" * 60)
 
     try:
+        # Pre-flight check: Verify server is available
+        if not check_server_availability():
+            logger.error("❌ Joplin server is not available - aborting backup")
+            logger.error("❌ Please ensure the server is running before attempting backup")
+            return 1
+
         # Load accounts
         accounts = load_accounts()
 
