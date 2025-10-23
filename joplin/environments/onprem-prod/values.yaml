@@ -11,9 +11,9 @@ app:
 
 # Database configuration
 database:
-  host: 100.102.105.59  # Tailscale hostname
-  port: 55434
-  name: joplin_prod
+  host: 192.168.2.10
+  port: 5432
+  name: joplin
   user: joplin
 
 mailer:
